@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend-only verification of Currency settings + WhatsApp bot reply settings on /settings (admin only). All 10 review scenarios pass: two new panels render with correct data-testids, currency form saves IDR (Rp 1.499 across products & Rp 26.722 dashboard stock-value), EUR preset produces '1.499,00 €', currency & WA-replies persist after reload, CSRF POST without _csrf token returns 419 on both /settings/currency and /settings/wa-replies, operator RBAC is enforced (redirects to /dashboard with 'You do not have permission' flash and Settings link hidden from sidebar), and regression pages (dashboard, products search, categories, users, profile) all return 200. Final currency left at IDR as requested; Drive/WhatsApp connection toggles untouched.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "verified_scenarios": {
+    "currency_panel_and_wa_replies_panel_render": true,
+    "currency_form_save_IDR_flash_and_preview": true,
+    "products_page_shows_Rp_1_499_and_Rp_799": true,
+    "dashboard_stock_value_uses_Rp_format": "Rp 26.722",
+    "eur_preset_renders_1499_00_euro_on_products": true,
+    "currency_persistence_after_reload": true,
+    "wa_replies_form_save_success_flash": true,
+    "wa_replies_persistence_including_tokens": true,
+    "rbac_operator_blocked_from_settings": true,
+    "csrf_419_on_currency_and_wa_replies_posts": true,
+    "regression_dashboard_products_search_categories_users_profile": true
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "money() and settings panels correctly gated by is_admin(); csrf_verify() properly returns 419.",
+    "Minor: currency_space toggle uses \\xa0 (nbsp) between symbol and amount which is correct for typography but tests should account for it.",
+    "Reply-template tokens ({name}{sku}{price}{stock}{category}{description}) accepted verbatim and persisted; token substitution path in whatsapp.php not exercised at runtime (no live Meta token)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100% (11/11 scenarios)"},
+  "test_credentials": "admin@productdrive.test/admin123, operator@productdrive.test/operator123 (from review request)",
+  "seed_data_creation": "None — used existing seeded 5 products.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Currency left at IDR (code=IDR, symbol=Rp, position=before, decimals=0, thousand='.', decimal=',', space=on). WA-replies left at: max=5, images+videos on, welcome/no-results/product-reply templates as posted during test. CSRF must be posted via same-origin fetch (not urllib) to properly carry PHP session; otherwise require_admin() short-circuits with 403 before csrf_verify()."
+}

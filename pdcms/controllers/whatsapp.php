@@ -87,43 +87,62 @@ function wa_receive(): void {
     exit;
 }
 
+function wa_render(string $tpl, array $map): string {
+    return strtr($tpl, $map);
+}
+
 function wa_handle_query(array $c, string $from, string $text): void {
     $lower = strtolower($text);
-    if (in_array($lower, ['hi', 'hello', 'help', 'hai', 'halo', 'menu', 'start'], true)) {
-        wa_send_text($c, $from, "👋 Welcome to " . APP_NAME . "!\n\nSend a product *name* or *SKU* to search. I'll reply with details, images and any product video.\n\nExample: \"laptop\" or \"PD-1001\".");
+    $greetings = ['hi', 'hello', 'help', 'hai', 'halo', 'menu', 'start'];
+    if (in_array($lower, $greetings, true)) {
+        $welcome = (string)setting_get('wa_welcome_message',
+            "👋 Welcome to {app}!\n\nSend a product *name* or *SKU* to search. I'll reply with details, images and any product video.\n\nExample: \"laptop\" or \"PD-1001\".");
+        wa_send_text($c, $from, wa_render($welcome, ['{app}' => APP_NAME]));
         return;
     }
 
+    $max = max(1, min(10, (int)setting_get('wa_max_results', 3)));
     $like = '%' . $text . '%';
     $stmt = db()->prepare(
-        "SELECT * FROM products
-         WHERE status = 'active' AND (name LIKE ? OR sku LIKE ? OR description LIKE ?)
-         ORDER BY name LIMIT 3"
+        "SELECT p.*, cat.name AS category_name FROM products p
+         LEFT JOIN categories cat ON cat.id = p.category_id
+         WHERE p.status = 'active' AND (p.name LIKE ? OR p.sku LIKE ? OR p.description LIKE ?)
+         ORDER BY p.name LIMIT $max"
     );
     $stmt->execute([$like, $like, $like]);
     $rows = $stmt->fetchAll();
 
     if (!$rows) {
-        wa_send_text($c, $from, "No products found for \"$text\". Try a different name or SKU.");
+        $noRes = (string)setting_get('wa_no_results_message', "No products found for \"{query}\". Try a different name or SKU.");
+        wa_send_text($c, $from, wa_render($noRes, ['{query}' => $text]));
         return;
     }
 
+    $tpl = (string)setting_get('wa_reply_template',
+        "*{name}*\n🏷️ SKU: {sku}\n💰 Price: {price}\n📦 Stock: {stock}\n\n{description}");
+    $sendImages = setting_get('wa_send_images', '1') !== '0';
+    $sendVideos = setting_get('wa_send_videos', '1') !== '0';
+
     foreach ($rows as $p) {
-        $price = (float)$p['price'] > 0 ? "\n💰 Price: " . money($p['price']) : '';
-        $sku   = $p['sku'] ? "\n🏷️ SKU: " . $p['sku'] : '';
-        $stock = "\n📦 Stock: " . (int)$p['stock'];
-        $desc  = $p['description'] ? "\n\n" . mb_substr(strip_tags($p['description']), 0, 500) : '';
-        $caption = "*" . $p['name'] . "*" . $sku . $price . $stock . $desc;
+        $caption = wa_render($tpl, [
+            '{name}'        => $p['name'],
+            '{sku}'         => (string)($p['sku'] ?? ''),
+            '{price}'       => money($p['price']),
+            '{stock}'       => (string)(int)$p['stock'],
+            '{category}'    => (string)($p['category_name'] ?? ''),
+            '{description}' => trim(strip_tags((string)($p['description'] ?? ''))),
+        ]);
+        $caption = mb_substr(trim($caption), 0, 1024);
 
         $img = product_image_abs($p);
         $vid = product_video_abs($p);
 
-        if ($img && preg_match('#^https://#', $img)) {
+        if ($sendImages && $img && preg_match('#^https://#', $img)) {
             wa_send_image($c, $from, $img, $caption);
         } else {
             wa_send_text($c, $from, $caption);
         }
-        if ($vid && preg_match('#^https://#', $vid)) {
+        if ($sendVideos && $vid && preg_match('#^https://#', $vid)) {
             wa_send_video($c, $from, $vid, 'Product video: ' . $p['name']);
         }
     }

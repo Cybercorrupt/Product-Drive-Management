@@ -141,7 +141,18 @@ function product_video_abs($p): string {
     return '';
 }
 
-function money($n): string { return number_format((float)$n, 2); }
+function money($n): string {
+    $symbol = (string)setting_get('currency_symbol', '$');
+    $pos    = setting_get('currency_position', 'before');
+    $dec    = (int)setting_get('currency_decimals', 2);
+    $ts     = setting_get('currency_thousand_sep', ',');
+    $ds     = setting_get('currency_decimal_sep', '.');
+    if ($ts === 'none') $ts = '';
+    $num = number_format((float)$n, max(0, min(4, $dec)), $ds, $ts);
+    if ($symbol === '') return $num;
+    $space = setting_bool('currency_space') ? "\u{00A0}" : '';
+    return $pos === 'after' ? $num . $space . $symbol : $symbol . $space . $num;
+}
 function slugify($t): string {
     $t = strtolower(trim($t));
     $t = preg_replace('/[^a-z0-9]+/', '-', $t);

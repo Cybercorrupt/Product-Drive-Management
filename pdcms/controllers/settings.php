@@ -10,6 +10,8 @@ function settings_route(string $action, array $seg, string $method): void {
         case 'drive-test:POST':      settings_test_drive(); break;
         case 'drive-sync:POST':      settings_sync_drive(); break;
         case 'whatsapp:POST':        settings_save_whatsapp(); break;
+        case 'wa-replies:POST':      settings_save_wa_replies(); break;
+        case 'currency:POST':        settings_save_currency(); break;
         case 'whatsapp-test:POST':   settings_test_whatsapp(); break;
         default: http_response_code(404); render('errors/404', ['title' => 'Not Found', 'active' => 'settings']);
     }
@@ -38,6 +40,33 @@ function settings_save_general(): void {
     csrf_verify();
     setting_set('app_url', trim($_POST['app_url'] ?? ''));
     flash('success', 'General settings saved.');
+    redirect('settings');
+}
+
+function settings_save_currency(): void {
+    csrf_verify();
+    setting_set('currency_code', strtoupper(trim($_POST['currency_code'] ?? 'USD')) ?: 'USD');
+    setting_set('currency_symbol', trim($_POST['currency_symbol'] ?? '$'));
+    setting_set('currency_position', ($_POST['currency_position'] ?? 'before') === 'after' ? 'after' : 'before');
+    setting_set('currency_decimals', (string)max(0, min(4, (int)($_POST['currency_decimals'] ?? 2))));
+    $ts = $_POST['currency_thousand_sep'] ?? ',';
+    setting_set('currency_thousand_sep', in_array($ts, [',', '.', ' ', 'none'], true) ? $ts : ',');
+    $ds = $_POST['currency_decimal_sep'] ?? '.';
+    setting_set('currency_decimal_sep', in_array($ds, ['.', ','], true) ? $ds : '.');
+    setting_set('currency_space', isset($_POST['currency_space']) ? '1' : '0');
+    flash('success', 'Currency & format saved. Example: ' . money(1234567.5));
+    redirect('settings');
+}
+
+function settings_save_wa_replies(): void {
+    csrf_verify();
+    setting_set('wa_max_results', (string)max(1, min(10, (int)($_POST['wa_max_results'] ?? 3))));
+    setting_set('wa_send_images', isset($_POST['wa_send_images']) ? '1' : '0');
+    setting_set('wa_send_videos', isset($_POST['wa_send_videos']) ? '1' : '0');
+    setting_set('wa_welcome_message', trim($_POST['wa_welcome_message'] ?? ''));
+    setting_set('wa_no_results_message', trim($_POST['wa_no_results_message'] ?? ''));
+    setting_set('wa_reply_template', trim($_POST['wa_reply_template'] ?? ''));
+    flash('success', 'WhatsApp bot replies saved.');
     redirect('settings');
 }
 

@@ -120,6 +120,123 @@ $hasSA        = setting_has('drive_service_account');
         </div>
     </div>
 
+    <!-- Currency & format -->
+    <div class="col-lg-6">
+        <div class="panel h-100" data-testid="currency-settings-panel">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span style="width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:rgba(217,119,6,.14);color:var(--bs-warning);"><i class="bi bi-cash-coin" style="font-size:1.1rem;"></i></span>
+                <div>
+                    <h3 class="h6 mb-0">Currency &amp; format</h3>
+                    <small style="color:var(--muted)">How prices are displayed across the CMS &amp; bot</small>
+                </div>
+            </div>
+            <form method="post" action="<?= url('settings/currency') ?>" data-testid="currency-form" id="currencyForm">
+                <?= csrf_field() ?>
+                <div class="row g-2">
+                    <div class="col-4 mb-2">
+                        <label class="form-label" for="currency_code">Code</label>
+                        <input type="text" maxlength="6" class="form-control" id="currency_code" name="currency_code" value="<?= e(setting_get('currency_code', 'USD')) ?>" data-testid="currency-code-input">
+                    </div>
+                    <div class="col-4 mb-2">
+                        <label class="form-label" for="currency_symbol">Symbol</label>
+                        <input type="text" maxlength="6" class="form-control" id="currency_symbol" name="currency_symbol" value="<?= e(setting_get('currency_symbol', '$')) ?>" data-testid="currency-symbol-input">
+                    </div>
+                    <div class="col-4 mb-2">
+                        <label class="form-label" for="currency_position">Position</label>
+                        <select class="form-select" id="currency_position" name="currency_position" data-testid="currency-position-select">
+                            <option value="before" <?= setting_get('currency_position', 'before') === 'before' ? 'selected' : '' ?>>Before</option>
+                            <option value="after" <?= setting_get('currency_position') === 'after' ? 'selected' : '' ?>>After</option>
+                        </select>
+                    </div>
+                    <div class="col-4 mb-2">
+                        <label class="form-label" for="currency_decimals">Decimals</label>
+                        <input type="number" min="0" max="4" class="form-control" id="currency_decimals" name="currency_decimals" value="<?= e(setting_get('currency_decimals', '2')) ?>" data-testid="currency-decimals-input">
+                    </div>
+                    <div class="col-4 mb-2">
+                        <label class="form-label" for="currency_thousand_sep">Thousands</label>
+                        <?php $ts = setting_get('currency_thousand_sep', ','); ?>
+                        <select class="form-select" id="currency_thousand_sep" name="currency_thousand_sep" data-testid="currency-thousand-select">
+                            <option value="," <?= $ts === ',' ? 'selected' : '' ?>>1,000</option>
+                            <option value="." <?= $ts === '.' ? 'selected' : '' ?>>1.000</option>
+                            <option value=" " <?= $ts === ' ' ? 'selected' : '' ?>>1 000</option>
+                            <option value="none" <?= $ts === 'none' ? 'selected' : '' ?>>1000</option>
+                        </select>
+                    </div>
+                    <div class="col-4 mb-2">
+                        <label class="form-label" for="currency_decimal_sep">Decimal</label>
+                        <?php $ds = setting_get('currency_decimal_sep', '.'); ?>
+                        <select class="form-select" id="currency_decimal_sep" name="currency_decimal_sep" data-testid="currency-decimal-select">
+                            <option value="." <?= $ds === '.' ? 'selected' : '' ?>>0.50</option>
+                            <option value="," <?= $ds === ',' ? 'selected' : '' ?>>0,50</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="currency_space" name="currency_space" <?= setting_bool('currency_space') ? 'checked' : '' ?> data-testid="currency-space-toggle">
+                    <label class="form-check-label" for="currency_space" style="font-size:.85rem;">Space between symbol and amount</label>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="input-hint w-100">Quick presets:</span>
+                    <button type="button" class="btn btn-icon" style="width:auto;padding:.35rem .7rem;font-size:.8rem;" data-cur-preset='{"code":"USD","symbol":"$","position":"before","decimals":"2","thousand":",","decimal":".","space":false}'>USD $</button>
+                    <button type="button" class="btn btn-icon" style="width:auto;padding:.35rem .7rem;font-size:.8rem;" data-cur-preset='{"code":"IDR","symbol":"Rp","position":"before","decimals":"0","thousand":".","decimal":",","space":true}'>IDR Rp</button>
+                    <button type="button" class="btn btn-icon" style="width:auto;padding:.35rem .7rem;font-size:.8rem;" data-cur-preset='{"code":"EUR","symbol":"€","position":"after","decimals":"2","thousand":".","decimal":",","space":true}'>EUR €</button>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-primary" type="submit" data-testid="currency-save-btn"><i class="bi bi-check-lg me-1"></i> Save currency</button>
+                    <span class="badge-mono" data-testid="currency-preview">Preview: <span id="curPreview"><?= e(money(1234567.5)) ?></span></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- WhatsApp bot replies -->
+    <div class="col-lg-6">
+        <div class="panel h-100" data-testid="wa-replies-panel">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span style="width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:rgba(16,185,129,.14);color:var(--bs-success);"><i class="bi bi-chat-dots" style="font-size:1.1rem;"></i></span>
+                <div>
+                    <h3 class="h6 mb-0">WhatsApp bot replies</h3>
+                    <small style="color:var(--muted)">Customise what the bot sends back</small>
+                </div>
+            </div>
+            <form method="post" action="<?= url('settings/wa-replies') ?>" data-testid="wa-replies-form">
+                <?= csrf_field() ?>
+                <div class="row g-2 align-items-end mb-2">
+                    <div class="col-5">
+                        <label class="form-label" for="wa_max_results">Max results</label>
+                        <input type="number" min="1" max="10" class="form-control" id="wa_max_results" name="wa_max_results" value="<?= e(setting_get('wa_max_results', '3')) ?>" data-testid="wa-max-results-input">
+                    </div>
+                    <div class="col-7">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="wa_send_images" name="wa_send_images" <?= setting_get('wa_send_images', '1') !== '0' ? 'checked' : '' ?> data-testid="wa-send-images-toggle">
+                            <label class="form-check-label" for="wa_send_images" style="font-size:.85rem;">Send product images</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="wa_send_videos" name="wa_send_videos" <?= setting_get('wa_send_videos', '1') !== '0' ? 'checked' : '' ?> data-testid="wa-send-videos-toggle">
+                            <label class="form-check-label" for="wa_send_videos" style="font-size:.85rem;">Send product videos</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label" for="wa_welcome_message">Welcome / help message</label>
+                    <textarea class="form-control" id="wa_welcome_message" name="wa_welcome_message" rows="2" data-testid="wa-welcome-input"><?= e(setting_get('wa_welcome_message', "👋 Welcome to {app}!\n\nSend a product *name* or *SKU* to search. Example: \"laptop\" or \"PD-1001\".")) ?></textarea>
+                    <div class="input-hint">Token: <span class="badge-mono">{app}</span></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label" for="wa_no_results_message">No-results message</label>
+                    <textarea class="form-control" id="wa_no_results_message" name="wa_no_results_message" rows="2" data-testid="wa-noresults-input"><?= e(setting_get('wa_no_results_message', "No products found for \"{query}\". Try a different name or SKU.")) ?></textarea>
+                    <div class="input-hint">Token: <span class="badge-mono">{query}</span></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label" for="wa_reply_template">Product reply template</label>
+                    <textarea class="form-control" id="wa_reply_template" name="wa_reply_template" rows="4" data-testid="wa-template-input"><?= e(setting_get('wa_reply_template', "*{name}*\n🏷️ SKU: {sku}\n💰 Price: {price}\n📦 Stock: {stock}\n\n{description}")) ?></textarea>
+                    <div class="input-hint">Tokens: <span class="badge-mono">{name}</span> <span class="badge-mono">{sku}</span> <span class="badge-mono">{price}</span> <span class="badge-mono">{stock}</span> <span class="badge-mono">{category}</span> <span class="badge-mono">{description}</span></div>
+                </div>
+                <button class="btn btn-primary" type="submit" data-testid="wa-replies-save-btn"><i class="bi bi-check-lg me-1"></i> Save bot replies</button>
+            </form>
+        </div>
+    </div>
+
     <!-- General -->
     <div class="col-12">
         <div class="panel" data-testid="general-settings-panel">

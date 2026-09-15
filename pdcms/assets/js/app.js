@@ -72,6 +72,44 @@
         });
     }
 
+    // ---- Currency live preview + presets (Settings) ----
+    var curForm = document.getElementById('currencyForm');
+    if (curForm) {
+        var curPreview = document.getElementById('curPreview');
+        function fmtPreview() {
+            var symbol = (document.getElementById('currency_symbol').value || '');
+            var pos = document.getElementById('currency_position').value;
+            var dec = Math.max(0, Math.min(4, parseInt(document.getElementById('currency_decimals').value || '2', 10)));
+            var ts = document.getElementById('currency_thousand_sep').value;
+            if (ts === 'none') ts = '';
+            var ds = document.getElementById('currency_decimal_sep').value;
+            var space = document.getElementById('currency_space').checked ? '\u00A0' : '';
+            var n = (1234567.5).toFixed(dec);
+            var parts = n.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ts);
+            var num = parts.length > 1 ? parts[0] + ds + parts[1] : parts[0];
+            var out = symbol === '' ? num : (pos === 'after' ? num + space + symbol : symbol + space + num);
+            if (curPreview) curPreview.textContent = out;
+        }
+        curForm.querySelectorAll('input,select').forEach(function (el) {
+            el.addEventListener('input', fmtPreview);
+            el.addEventListener('change', fmtPreview);
+        });
+        document.querySelectorAll('[data-cur-preset]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var p = JSON.parse(btn.getAttribute('data-cur-preset'));
+                document.getElementById('currency_code').value = p.code;
+                document.getElementById('currency_symbol').value = p.symbol;
+                document.getElementById('currency_position').value = p.position;
+                document.getElementById('currency_decimals').value = p.decimals;
+                document.getElementById('currency_thousand_sep').value = p.thousand;
+                document.getElementById('currency_decimal_sep').value = p.decimal;
+                document.getElementById('currency_space').checked = !!p.space;
+                fmtPreview();
+            });
+        });
+    }
+
     // ---- Confirm-before-submit (delete forms) ----
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
         form.addEventListener('submit', function (e) {
