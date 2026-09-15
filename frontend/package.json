@@ -61,7 +61,8 @@
     "zod": "3.24.4"
   },
   "scripts": {
-    "start": "craco start",
+    "start": "php8.2 -d display_errors=0 -d variables_order=EGPCS -S 0.0.0.0:${PORT:-3000} -t /app/pdcms /app/pdcms/router.php",
+    "start:react": "craco start",
     "build": "craco build",
     "test": "craco test"
   },

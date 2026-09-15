@@ -1,0 +1,22 @@
+{
+  "summary": "Re-test after preview/serving fix. Confirmed the PHP CMS is reachable via the preview URL under the 'frontend' supervisor program on port 3000. All 5 requested smoke flows PASS: root redirects to /login; login page renders with expected heading and testids; wrong password shows 'Invalid email or password' error; admin login succeeds and lands on /dashboard showing stat-grid, recent-products-panel, and low-stock-panel; /products lists 5 seeded products with thumbnails; logout via user-menu -> menu-logout returns to /login and /dashboard is no longer accessible (redirects to /login).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Products list", "issues": ["Only 4 of 5 product rows render a thumbnail <img>; one row appears to have no image asset. Minor cosmetic only."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_1.json", "/app/test_reports/iteration_2.json"],
+  "action_items": [],
+  "critical_code_review_comments": ["No new code-level concerns for this preview-fix retest. Prior functional coverage in iteration_1 (30/30) remains valid."],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested (skipped per request)", "frontend": "100% (5/5 flows)"},
+  "test_credentials": "admin@productdrive.test / admin123 verified working. operator@productdrive.test / operator123 not exercised this run.",
+  "seed_data_creation": "No new seed data created; existing 5 products present.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Preview URL https://import-cms-test.preview.emergentagent.com is served by the 'frontend' supervisor program running PHP built-in server on port 3000 against /app/pdcms via router.php. Login/dashboard/products/logout flows are green. If preview fails in the future, verify supervisor 'frontend' status and that PHP router is bound to 0.0.0.0:3000.",
+  "rca of the issue": "N/A - previously fixed by main agent (moved PHP built-in server under 'frontend' supervisor program so the platform's health-tracked program is RUNNING). Verified working end-to-end."
+}
