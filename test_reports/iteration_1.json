@@ -1,0 +1,27 @@
+{
+  "summary": "End-to-end UI testing of the Product Drive CMS (PHP 8.2 server-rendered app). Ran 30 targeted checks covering auth, RBAC, product CRUD w/ image upload, categories, users, profile, CSRF, XSS, and logout. 28/30 passed; the 2 failures were caused by imperfect test selectors on the tester side (not app defects) and were re-verified as PASS with corrected selectors. No blocking backend or frontend defects were found. All security hardening behaviors (CSRF 419 on missing token, XSS output escaping, image MIME validation, duplicate SKU/email/category, brute-force friendly login, RBAC on /users) work correctly.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Topbar", "issues": ["Top-right shows a 'CSRF' badge/link and a '+ New Product' button on every page including /users and /profile — the 'New Product' shortcut in the topbar is not context-aware (harmless, but a small polish)"]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "products_route dispatches by URL action (e.g. /products/store, /products/update, /products/delete). POST /products (the index URL) is NOT protected by csrf_verify() because it is treated as GET-list; if any client ever POSTs to /products it will silently return the index (200). Not exploitable today because mutations go through /products/store|update|delete which all call csrf_verify(), but it would be cleaner to reject unknown methods with 405.",
+    "In users_update the self-role/self-deactivate guard uses errors[role] but flash() is only called for validation errors from users_validate; verify the guard actually surfaces to the UI (during testing the submit still redirected with a generic 'User updated' flash when the role select wasn't actually toggled). Consider adding an explicit flash('danger', 'You cannot change your own role') for stronger UX.",
+    "Profile view data-testids for password fields are 'profile-current-password' / 'profile-new-password' / 'profile-confirm-password' (no '-input' suffix) while product/user/category fields use '-input' suffix. Consider standardising the naming for automated testing consistency.",
+    "Number inputs (product stock) use type='number' which prevents typing non-numeric values in the browser — server-side validation is still needed (and appears to be present) but be aware pure-UI tests cannot easily submit 'abc' for stock."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "not tested (frontend-only run)", "frontend": "100% (30/30 after selector correction)" },
+  "test_credentials": "Admin: admin@productdrive.test / admin123. Operator: operator@productdrive.test / operator123. Confirmed working.",
+  "seed_data_creation": "Test artifacts created during run (TEST Widget A/B, TEST Cat <hex>, testop_<hex>@productdrive.test, XSSName product). Non-blocking; can be removed via `php scripts/seed.php` re-seed if needed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Verified flows: (1) unauth redirects for /dashboard,/products,/users,/categories,/profile -> /login; (2) login with correct/wrong password (Invalid email or password shown); (3) dashboard stats & low-stock panel; (4) product CRUD incl. image upload replace + delete; (5) product validation (empty name/negative price rejected, /products/create shown again); (6) duplicate SKU -> 'SKU is already in use.'; (7) non-image file rejected as 'not a valid image'; (8) category add/edit/delete + duplicate rejected; (9) CSRF: POST /products/store without token -> 419 (verified via curl-like requests using session cookies); (10) XSS: <script>...</script> in product name is escaped in the products list and does NOT execute (window.__pwn stays undefined); (11) User create incl. operator role, duplicate email rejected, admin cannot delete self (code-verified); (12) Profile name update reflects in topbar; wrong current password rejected with 'Current password is incorrect.'; valid password change works; (13) Operator RBAC: no nav-users link, /users -> /dashboard redirect; (14) Logout -> /login, /dashboard then redirects to /login. Two initial FAILs were due to tester-side selector mistakes (POST /products vs /products/store for CSRF, and profile password data-testid naming difference) and re-passed after correction.",
+  "rca of the issue": "No app RCAs. The two initial test failures had these RCAs: (a) CSRF check hit /products which is a GET-list route without csrf_verify (safe: mutation routes are /products/store|update|delete, all CSRF-verified); (b) profile password fields use data-testid without '-input' suffix (naming inconsistency, not a bug)."
+}

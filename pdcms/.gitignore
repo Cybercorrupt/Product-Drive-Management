@@ -1,0 +1,11 @@
+# Secrets & local config
+.env
+
+# Uploaded files (keep the folder, ignore contents)
+uploads/*
+!uploads/.gitkeep
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log

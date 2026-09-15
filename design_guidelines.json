@@ -1,0 +1,139 @@
+{
+  "project_title": "Product Drive CMS - Hardened PHP & Bootstrap Admin Visual System",
+  "app_type": "dashboard",
+  "archetype": "ARCHETYPE 2: PERFORMANCE PRO & ARCHETYPE 4: SWISS PRECISION",
+  "theme_strategy": {
+    "default_mode": "dark",
+    "toggle_mechanism": "data-bs-theme attribute on <html> element with localStorage persistence and system media query sync script in <head>",
+    "background_dark": "#0B0F17",
+    "surface_dark": "#131A26",
+    "surface_border_dark": "rgba(255, 255, 255, 0.08)",
+    "background_light": "#F8FAFC",
+    "surface_light": "#FFFFFF",
+    "surface_border_light": "rgba(15, 23, 42, 0.08)"
+  },
+  "typography": {
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap",
+    "heading_font": "'Outfit', sans-serif",
+    "body_font": "'Plus Jakarta Sans', sans-serif",
+    "mono_font": "'JetBrains Mono', monospace",
+    "rules": {
+      "headings": "font-family: 'Outfit', sans-serif; tracking: tight (-0.02em); letter spacing is tight for headers above 24px.",
+      "body": "font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1.5;",
+      "badges_ids_code": "font-family: 'JetBrains Mono', monospace; font-size: 0.8125rem;",
+      "forbidden_fonts": ["Inter", "Roboto", "Space Grotesk"]
+    }
+  },
+  "colors": {
+    "css_variables": {
+      "light_mode": {
+        "--bs-body-bg": "#F8FAFC",
+        "--bs-body-color": "#0F172A",
+        "--bs-primary": "#2563EB",
+        "--bs-primary-hover": "#1D4ED8",
+        "--bs-secondary": "#64748B",
+        "--bs-success": "#059669",
+        "--bs-warning": "#D97706",
+        "--bs-danger": "#DC2626",
+        "--bs-info": "#0891B2",
+        "--card-bg": "#FFFFFF",
+        "--card-border": "rgba(15, 23, 42, 0.08)",
+        "--sidebar-bg": "#0F172A",
+        "--sidebar-text": "#94A3B8",
+        "--sidebar-text-active": "#FFFFFF",
+        "--topbar-bg": "rgba(255, 255, 255, 0.85)"
+      },
+      "dark_mode": {
+        "--bs-body-bg": "#090D16",
+        "--bs-body-color": "#E2E8F0",
+        "--bs-primary": "#3B82F6",
+        "--bs-primary-hover": "#60A5FA",
+        "--bs-secondary": "#94A3B8",
+        "--bs-success": "#10B981",
+        "--bs-warning": "#F59E0B",
+        "--bs-danger": "#EF4444",
+        "--bs-info": "#06B6D4",
+        "--card-bg": "#111827",
+        "--card-border": "rgba(255, 255, 255, 0.08)",
+        "--sidebar-bg": "#0B0F19",
+        "--sidebar-text": "#94A3B8",
+        "--sidebar-text-active": "#3B82F6",
+        "--topbar-bg": "rgba(17, 24, 39, 0.85)"
+      }
+    },
+    "forbidden_colors": ["#7351B7", "#1B93A4"]
+  },
+  "layout_architecture": {
+    "type": "Sidebar + Fixed Topbar + Scrollable Content",
+    "sidebar_width": "260px",
+    "topbar_height": "64px",
+    "spacing_scale": "High Density Mode B. Use generous padding (p-4 to p-6 inside cards, gap-4 to gap-6 between grid widgets).",
+    "responsive_behavior": "Sidebar collapses into offcanvas drawer on screens < 992px with hamburger toggle button in topbar."
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Used on sticky topbar and modal headers: backdrop-filter: blur(12px) saturate(150%); border-bottom: 1px solid var(--card-border).",
+    "card_styling": "Flat background with 1px precise border, subtle inset highlight on hover, rounded-3 (8px radius). No heavy box shadows.",
+    "micro_interactions": {
+      "buttons": "transition: all 0.15s ease-in-out; transform active state: scale(0.98); focus ring: 0 0 0 3px rgba(59, 130, 246, 0.3);",
+      "table_rows": "hover transition: background-color 0.15s ease; cursor pointer on actionable rows.",
+      "stat_cards": "hover lift: translateY(-2px); border color brightens slightly."
+    }
+  },
+  "components_and_patterns": {
+    "navigation": {
+      "sidebar": "Dark high-contrast theme with brand badge at top, organized section headers (MAIN, CATALOG, SYSTEM), active indicator bar on left border.",
+      "topbar": "Search command pill, CSRF indicator badge, quick product add action button, user dropdown menu with role pill badge (Admin / Operator)."
+    },
+    "data_tables": {
+      "style": "Bordered table with subtle horizontal grid lines, sticky header, responsive wrapper with overflow-x-auto.",
+      "elements": "Thumbnail preview column (40x40 rounded image with lightbox/hover preview), status badges, action icons (Edit, View, Delete with CSRF token in form/modal)."
+    },
+    "forms": {
+      "style": "Input fields with subtle 1px border, floating labels or high-legibility bold top labels, password toggle visibility icon button, drag-and-drop file upload area with live image thumbnail preview.",
+      "validation": "Server-rendered inline feedback (.invalid-feedback) + client-side HTML5 validation styling."
+    },
+    "flash_alerts": {
+      "container": "Top right floating toast container or embedded page banner alert.",
+      "style": "Dismissible Bootstrap alerts styled with left accent border (4px solid color matching success/danger/warning) and auto-fade out with vanilla JS."
+    },
+    "empty_states": {
+      "design": "Centered subtle box with mono-colored SVG icon, muted title, clear action button (e.g., 'Add First Product')."
+    }
+  },
+  "media_assets": {
+    "sample_product_images": [
+      {
+        "url": "https://images.unsplash.com/photo-1738707060349-c92b5b15bf80?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBwcm9kdWN0JTIwdGVjaCUyMG1pbmltYWxpc218ZW58MHx8fHwxNzg5NDEwNDY2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Minimalist Pro Laptop",
+        "category": "Tech / Hardware"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1778896135791-a29fff9b8e45?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBwcm9kdWN0JTIwdGVjaCUyMG1pbmltYWxpc218ZW58MHx8fHwxNzg5NDEwNDY2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Light Blue Smartphone",
+        "category": "Mobile Devices"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1760520338254-1bb9327ca51c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBwcm9kdWN0JTIwdGVjaCUyMG1pbmltYWxpc218ZW58MHx8fHwxNzg5NDEwNDY2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Smartwatch Minimalist",
+        "category": "Wearables"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1757168120889-4317e57a4849?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBwcm9kdWN0JTIwdGVjaCUyMG1pbmltYWxpc218ZW58MHx8fHwxNzg5NDEwNDY2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Wireless Earbuds",
+        "category": "Audio"
+      }
+    ]
+  },
+  "testing_and_accessibility": {
+    "data_testid_rules": "All interactive elements, input fields, tables, forms, buttons, alerts, and navigation links MUST have explicit data-testid attributes in kebab-case format (e.g. data-testid=\"login-submit-btn\", data-testid=\"product-search-input\", data-testid=\"product-row-12\").",
+    "contrast_ratio": "APCA / WCAG 2.1 AA compliant text against card backgrounds. Minimum 4.5:1 ratio.",
+    "keyboard_navigation": "Visible focus ring (2px blue offset) on all inputs, buttons, and custom toggles."
+  },
+  "instructions_to_main_agent": [
+    "Rebuild 'Product Drive CMS' in clean PHP 8+ with PDO MySQL/MariaDB and Bootstrap 5.3+.",
+    "Implement all required hardening measures: Password hashing (password_hash/password_verify), CSRF protection tokens on all POST/PUT/DELETE forms, Prepared statements against SQL injection, HTML entity escaping (htmlspecialchars) against XSS, Session fixation protection and strict RBAC authorization (Admin vs Operator).",
+    "Apply the visual system specified above using custom CSS overriding Bootstrap CSS custom variables (--bs-body-bg, --bs-body-color, etc.) in a main custom stylesheet (e.g. assets/css/custom-theme.css).",
+    "Include data-testid on all key UI elements across all PHP templates.",
+    "Provide full product CRUD, image upload with preview, user management with role editing, category management, profile settings, search & filter, and dashboard summary stats."
+  ]
+}
