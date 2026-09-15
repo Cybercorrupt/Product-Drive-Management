@@ -55,8 +55,8 @@
                 <tr data-testid="product-row-<?= (int)$p['id'] ?>">
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <?php if ($p['image']): ?><img src="<?= e(upload_url($p['image'])) ?>" class="thumb" alt="<?= e($p['name']) ?>"><?php else: ?><div class="thumb thumb-empty"><i class="bi bi-image"></i></div><?php endif; ?>
-                            <div><strong><?= e($p['name']) ?></strong><?php if ($p['sku']): ?><br><span class="badge-mono"><?= e($p['sku']) ?></span><?php endif; ?></div>
+                            <?php $pimg = product_image_url($p); if ($pimg): ?><img src="<?= e($pimg) ?>" class="thumb" alt="<?= e($p['name']) ?>"><?php else: ?><div class="thumb thumb-empty"><i class="bi bi-image"></i></div><?php endif; ?>
+                            <div><strong><?= e($p['name']) ?></strong><?php if ($p['sku']): ?><br><span class="badge-mono"><?= e($p['sku']) ?></span><?php endif; ?><?php if (!empty($p['video']) || !empty($p['video_drive_id'])): ?> <span class="badge-mono" title="Has video"><i class="bi bi-camera-video"></i></span><?php endif; ?><?php if (!empty($p['image_drive_id']) || !empty($p['video_drive_id'])): ?> <span class="badge-mono" title="On Google Drive"><i class="bi bi-google"></i></span><?php endif; ?></div>
                         </div>
                     </td>
                     <td><?= $p['category_name'] ? e($p['category_name']) : '<span class="text-secondary">—</span>' ?></td>

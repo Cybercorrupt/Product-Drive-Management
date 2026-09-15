@@ -93,6 +93,54 @@ function delete_upload($file): void {
 }
 
 // ---------- Misc ----------
+// ---------- Video upload ----------
+function handle_video_upload(string $field, &$error) {
+    if (empty($_FILES[$field]) || $_FILES[$field]['error'] === UPLOAD_ERR_NO_FILE) return null;
+    $f = $_FILES[$field];
+    if ($f['error'] !== UPLOAD_ERR_OK) { $error = 'Video upload failed (error code ' . $f['error'] . ').'; return false; }
+    $max = 16 * 1024 * 1024; // WhatsApp video limit
+    if ($f['size'] > $max) { $error = 'Video exceeds the 16 MB limit.'; return false; }
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $f['tmp_name']);
+    finfo_close($finfo);
+    $allowed = ['video/mp4' => 'mp4', 'video/webm' => 'webm', 'video/quicktime' => 'mov'];
+    if (!isset($allowed[$mime])) { $error = 'Only MP4, WEBM or MOV videos are allowed.'; return false; }
+    if (!is_dir(UPLOAD_DIR)) @mkdir(UPLOAD_DIR, 0755, true);
+    $name = bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
+    if (!move_uploaded_file($f['tmp_name'], UPLOAD_DIR . '/' . $name)) { $error = 'Could not save the video.'; return false; }
+    return $name;
+}
+
+// ---------- Absolute URLs (needed for WhatsApp media links) ----------
+function abs_base_url(): string {
+    $u = trim((string)setting_get('app_url', ''));
+    if ($u !== '') return rtrim($u, '/');
+    $proto = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+           || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
+    return $proto . '://' . $host . (APP_BASE !== '' ? APP_BASE : '');
+}
+function abs_url(string $path): string {
+    return preg_match('#^https?://#', $path) ? $path : (abs_base_url() . '/' . ltrim($path, '/'));
+}
+
+// ---------- Product media resolvers (Drive-aware) ----------
+function product_image_url($p): string {
+    if (!empty($p['image_drive_id'])) return drive_view_url($p['image_drive_id']);
+    if (!empty($p['image'])) return upload_url($p['image']);
+    return '';
+}
+function product_image_abs($p): string {
+    if (!empty($p['image_drive_id'])) return drive_view_url($p['image_drive_id']);
+    if (!empty($p['image'])) return preg_match('#^https?://#', $p['image']) ? $p['image'] : abs_url('uploads/' . rawurlencode($p['image']));
+    return '';
+}
+function product_video_abs($p): string {
+    if (!empty($p['video_drive_id'])) return drive_view_url($p['video_drive_id']);
+    if (!empty($p['video'])) return preg_match('#^https?://#', $p['video']) ? $p['video'] : abs_url('uploads/' . rawurlencode($p['video']));
+    return '';
+}
+
 function money($n): string { return number_format((float)$n, 2); }
 function slugify($t): string {
     $t = strtolower(trim($t));

@@ -40,3 +40,18 @@ deployable to cPanel, with security hardening.
 - P1: activity/audit log, bulk product actions, CSV import/export.
 - P2: product multi-image gallery, soft-delete/restore, per-user avatars, remember-me.
 - Deploy phase: fill real cPanel domain/db creds, run AutoSSL, delete demo accounts.
+
+## Integrations added (2026-09-15)
+- **Admin Settings page** (`/settings`, admin-only): DB-backed `settings` table, secrets shown masked.
+- **Google Drive storage** (Service Account via JWT+cURL, no SDK): product image/video uploaded to a
+  shared Drive folder when enabled; automatic **local fallback**; "Test connection" + "Sync local files"
+  actions. Files served via `drive.google.com/uc?export=view&id=...`. Helper: `includes/google_drive.php`.
+- **WhatsApp bot** (Meta Cloud API): public webhook `/whatsapp/webhook` (GET verify + POST with
+  `X-Hub-Signature-256` HMAC check); searches active products by name/SKU/description and replies with
+  details + image + optional video. Config + test-send in Settings. Controller: `controllers/whatsapp.php`.
+- **Product video** upload (MP4/WEBM/MOV ≤16MB) added to product form; new columns
+  `products.image_drive_id/video/video_drive_id` (migrate via `scripts/migrate.php`).
+- Docs: `docs/INTEGRATIONS.md`. Verified: Settings CRUD + secret masking/retention, CSRF 419,
+  webhook verify/signature, RBAC, local-fallback product create — testing agent 36/36 pass.
+- NOTE: live Google Drive & WhatsApp calls require real credentials the user will add later; only the
+  config UI, webhook verify/signature, and local fallback were exercised.

@@ -60,6 +60,18 @@
         });
     });
 
+    // ---- Video picker (filename display + dropzone click) ----
+    var videoInput = document.getElementById('videoInput');
+    if (videoInput) {
+        var vzone = videoInput.closest('.dropzone');
+        var vname = document.getElementById('videoName');
+        if (vzone) vzone.addEventListener('click', function (e) { if (e.target !== videoInput) videoInput.click(); });
+        videoInput.addEventListener('change', function () {
+            var f = videoInput.files && videoInput.files[0];
+            if (f && vname) vname.textContent = f.name;
+        });
+    }
+
     // ---- Confirm-before-submit (delete forms) ----
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
         form.addEventListener('submit', function (e) {

@@ -68,8 +68,8 @@ $val = function ($key, $default = '') use ($product) {
             <div class="panel">
                 <label class="form-label">Product image</label>
                 <div class="dropzone" data-testid="product-image-dropzone">
-                    <img class="preview" id="imgPreview" src="<?= $isEdit && $product['image'] ? e(upload_url($product['image'])) : '' ?>" style="<?= $isEdit && $product['image'] ? '' : 'display:none;' ?>" alt="">
-                    <?php if (!($isEdit && $product['image'])): ?><div class="preview thumb-empty" id="imgPlaceholder" style="display:grid;"><i class="bi bi-image"></i></div><?php endif; ?>
+                    <img class="preview" id="imgPreview" src="<?= $isEdit && product_image_url($product) ? e(product_image_url($product)) : '' ?>" style="<?= $isEdit && product_image_url($product) ? '' : 'display:none;' ?>" alt="">
+                    <?php if (!($isEdit && product_image_url($product))): ?><div class="preview thumb-empty" id="imgPlaceholder" style="display:grid;"><i class="bi bi-image"></i></div><?php endif; ?>
                     <div class="dz-text">
                         <strong>Click to upload</strong>
                         <small>JPG, PNG, WEBP, GIF · max 3 MB</small>
@@ -77,6 +77,21 @@ $val = function ($key, $default = '') use ($product) {
                     <input type="file" name="image" accept="image/*" class="d-none" data-image-input data-preview="imgPreview" data-testid="product-image-input">
                 </div>
                 <?php if ($isEdit && $product['image']): ?><div class="input-hint">Leave empty to keep the current image.</div><?php endif; ?>
+            </div>
+            <div class="panel mt-3">
+                <label class="form-label">Product video <small style="color:var(--muted);font-weight:400;">(optional)</small></label>
+                <div class="dropzone" data-testid="product-video-dropzone">
+                    <div class="preview thumb-empty" style="display:grid;"><i class="bi bi-camera-video"></i></div>
+                    <div class="dz-text">
+                        <strong id="videoName"><?= $isEdit && $product['video'] ? 'Video attached' : 'Click to upload' ?></strong>
+                        <small>MP4, WEBM, MOV · max 16 MB</small>
+                    </div>
+                    <input type="file" name="video" accept="video/*" class="d-none" id="videoInput" data-testid="product-video-input">
+                </div>
+                <?php if ($isEdit && product_video_abs($product)): ?>
+                    <div class="input-hint mt-2"><a href="<?= e(product_video_abs($product)) ?>" target="_blank" rel="noopener">View current video</a> · leave empty to keep.</div>
+                <?php endif; ?>
+                <?php if (drive_is_enabled()): ?><div class="input-hint mt-2"><i class="bi bi-google"></i> Google Drive is enabled — files will be stored there.</div><?php endif; ?>
             </div>
             <div class="d-grid gap-2 mt-3">
                 <button type="submit" class="btn btn-primary py-2" data-testid="product-submit-btn"><i class="bi bi-check-lg me-1"></i> <?= $isEdit ? 'Save changes' : 'Create product' ?></button>

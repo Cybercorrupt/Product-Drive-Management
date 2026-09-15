@@ -37,7 +37,10 @@ CREATE TABLE IF NOT EXISTS products (
     price       DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     stock       INT NOT NULL DEFAULT 0,
     status      ENUM('active','draft','archived') NOT NULL DEFAULT 'active',
-    image       VARCHAR(255) NULL,
+    image          VARCHAR(255) NULL,
+    image_drive_id VARCHAR(255) NULL,
+    video          VARCHAR(255) NULL,
+    video_drive_id VARCHAR(255) NULL,
     description TEXT NULL,
     created_by  INT UNSIGNED NULL,
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -48,6 +51,13 @@ CREATE TABLE IF NOT EXISTS products (
     KEY idx_products_status (status),
     CONSTRAINT fk_products_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     CONSTRAINT fk_products_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS settings (
+    k          VARCHAR(120) NOT NULL,
+    v          TEXT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (k)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

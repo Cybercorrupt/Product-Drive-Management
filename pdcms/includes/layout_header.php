@@ -47,6 +47,9 @@
             <a href="<?= url('users') ?>" class="nav-item <?= $active === 'users' ? 'active' : '' ?>" data-testid="nav-users">
                 <i class="bi bi-people"></i><span>Users</span>
             </a>
+            <a href="<?= url('settings') ?>" class="nav-item <?= $active === 'settings' ? 'active' : '' ?>" data-testid="nav-settings">
+                <i class="bi bi-gear"></i><span>Settings</span>
+            </a>
             <?php endif; ?>
             <a href="<?= url('profile') ?>" class="nav-item <?= $active === 'profile' ? 'active' : '' ?>" data-testid="nav-profile">
                 <i class="bi bi-person-gear"></i><span>Profile</span>

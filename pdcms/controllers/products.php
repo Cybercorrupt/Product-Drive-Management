@@ -106,6 +106,15 @@ function products_validate(array $in, &$errors): array {
     ];
 }
 
+function products_maybe_drive(?string $localName): ?string {
+    if ($localName && !preg_match('#^https?://#', $localName) && drive_is_enabled()) {
+        $e = '';
+        $r = drive_upload_local($localName, $e);
+        if ($r) return $r['id'];
+    }
+    return null;
+}
+
 function products_store(): void {
     csrf_verify();
     $errors = [];
@@ -113,31 +122,44 @@ function products_store(): void {
 
     $uploadErr = '';
     $image = handle_image_upload('image', $uploadErr);
-    if ($image === false) $errors['image'] = $uploadErr;
+    if ($image === false) { $errors['image'] = $uploadErr; $image = null; }
+
+    $videoErr = '';
+    $video = handle_video_upload('video', $videoErr);
+    if ($video === false) { $errors['video'] = $videoErr; $video = null; }
 
     if ($errors) {
+        if ($image) delete_upload($image);
+        if ($video) delete_upload($video);
         set_old($_POST);
         foreach ($errors as $msg) flash('danger', $msg);
         redirect('products/create');
     }
 
+    $imageDriveId = products_maybe_drive($image);
+    $videoDriveId = products_maybe_drive($video);
+
     try {
         $stmt = db()->prepare(
-            'INSERT INTO products (name, sku, category_id, price, stock, status, image, description, created_by)
-             VALUES (?,?,?,?,?,?,?,?,?)'
+            'INSERT INTO products (name, sku, category_id, price, stock, status, image, image_drive_id, video, video_drive_id, description, created_by)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'
         );
         $stmt->execute([
             $data['name'], $data['sku'], $data['category_id'], $data['price'], $data['stock'],
-            $data['status'], $image, $data['description'], current_user()['id'],
+            $data['status'], $image, $imageDriveId, $video, $videoDriveId, $data['description'], current_user()['id'],
         ]);
     } catch (PDOException $e) {
         if ($image) delete_upload($image);
+        if ($video) delete_upload($video);
+        if ($imageDriveId) drive_delete($imageDriveId);
+        if ($videoDriveId) drive_delete($videoDriveId);
         set_old($_POST);
         flash('danger', str_contains($e->getMessage(), 'Duplicate') ? 'That SKU is already in use.' : 'Could not save product.');
         redirect('products/create');
     }
 
-    flash('success', 'Product created successfully.');
+    $note = drive_is_enabled() && ($imageDriveId || $videoDriveId) ? ' (files stored on Google Drive)' : '';
+    flash('success', 'Product created successfully.' . $note);
     redirect('products');
 }
 
@@ -153,33 +175,49 @@ function products_update(): void {
     $data = products_validate($_POST, $errors);
 
     $image = $existing['image'];
+    $imageDriveId = $existing['image_drive_id'];
     $newImage = null;
     if (!empty($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
         $uploadErr = '';
         $newImage = handle_image_upload('image', $uploadErr);
-        if ($newImage === false) $errors['image'] = $uploadErr;
+        if ($newImage === false) { $errors['image'] = $uploadErr; $newImage = null; }
+    }
+
+    $video = $existing['video'];
+    $videoDriveId = $existing['video_drive_id'];
+    $newVideo = null;
+    if (!empty($_FILES['video']) && $_FILES['video']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $videoErr = '';
+        $newVideo = handle_video_upload('video', $videoErr);
+        if ($newVideo === false) { $errors['video'] = $videoErr; $newVideo = null; }
     }
 
     if ($errors) {
         if ($newImage) delete_upload($newImage);
+        if ($newVideo) delete_upload($newVideo);
         set_old($_POST);
         foreach ($errors as $msg) flash('danger', $msg);
         redirect('products/edit/' . $id);
     }
 
-    if ($newImage) $image = $newImage;
+    $newImageDriveId = null;
+    $newVideoDriveId = null;
+    if ($newImage) { $image = $newImage; $newImageDriveId = products_maybe_drive($newImage); $imageDriveId = $newImageDriveId; }
+    if ($newVideo) { $video = $newVideo; $newVideoDriveId = products_maybe_drive($newVideo); $videoDriveId = $newVideoDriveId; }
 
     try {
         $stmt = db()->prepare(
-            'UPDATE products SET name=?, sku=?, category_id=?, price=?, stock=?, status=?, image=?, description=? WHERE id=?'
+            'UPDATE products SET name=?, sku=?, category_id=?, price=?, stock=?, status=?, image=?, image_drive_id=?, video=?, video_drive_id=?, description=? WHERE id=?'
         );
         $stmt->execute([
             $data['name'], $data['sku'], $data['category_id'], $data['price'], $data['stock'],
-            $data['status'], $image, $data['description'], $id,
+            $data['status'], $image, $imageDriveId, $video, $videoDriveId, $data['description'], $id,
         ]);
-        if ($newImage && $existing['image']) delete_upload($existing['image']);
+        if ($newImage && $existing['image']) { delete_upload($existing['image']); if ($existing['image_drive_id']) drive_delete($existing['image_drive_id']); }
+        if ($newVideo && $existing['video']) { delete_upload($existing['video']); if ($existing['video_drive_id']) drive_delete($existing['video_drive_id']); }
     } catch (PDOException $e) {
         if ($newImage) delete_upload($newImage);
+        if ($newVideo) delete_upload($newVideo);
         set_old($_POST);
         flash('danger', str_contains($e->getMessage(), 'Duplicate') ? 'That SKU is already in use.' : 'Could not update product.');
         redirect('products/edit/' . $id);
@@ -192,12 +230,15 @@ function products_update(): void {
 function products_delete(): void {
     csrf_verify();
     $id = (int)($_POST['id'] ?? 0);
-    $stmt = db()->prepare('SELECT image FROM products WHERE id = ?');
+    $stmt = db()->prepare('SELECT image, image_drive_id, video, video_drive_id FROM products WHERE id = ?');
     $stmt->execute([$id]);
     $product = $stmt->fetch();
     if ($product) {
         db()->prepare('DELETE FROM products WHERE id = ?')->execute([$id]);
         delete_upload($product['image']);
+        delete_upload($product['video']);
+        if (!empty($product['image_drive_id'])) drive_delete($product['image_drive_id']);
+        if (!empty($product['video_drive_id'])) drive_delete($product['video_drive_id']);
         flash('success', 'Product deleted.');
     } else {
         flash('danger', 'Product not found.');

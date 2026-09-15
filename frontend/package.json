@@ -61,7 +61,7 @@
     "zod": "3.24.4"
   },
   "scripts": {
-    "start": "php8.2 -d display_errors=0 -d variables_order=EGPCS -S 0.0.0.0:${PORT:-3000} -t /app/pdcms /app/pdcms/router.php",
+    "start": "php8.2 -d display_errors=0 -d variables_order=EGPCS -d upload_max_filesize=20M -d post_max_size=24M -d memory_limit=256M -S 0.0.0.0:${PORT:-3000} -t /app/pdcms /app/pdcms/router.php",
     "start:react": "craco start",
     "build": "craco build",
     "test": "craco test"

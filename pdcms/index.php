@@ -17,6 +17,8 @@ session_start();
 
 require INCLUDES . '/db.php';
 require INCLUDES . '/functions.php';
+require INCLUDES . '/settings.php';
+require INCLUDES . '/google_drive.php';
 require INCLUDES . '/auth.php';
 foreach (glob(CONTROLLERS . '/*.php') as $c) require $c;
 
@@ -63,6 +65,12 @@ try {
             break;
         case 'profile':
             profile_route($method);
+            break;
+        case 'settings':
+            settings_route($action, $segments, $method);
+            break;
+        case 'whatsapp':
+            whatsapp_route($action, $segments, $method);
             break;
         default:
             http_response_code(404);

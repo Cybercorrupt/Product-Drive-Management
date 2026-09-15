@@ -49,7 +49,7 @@
                         <tr data-testid="recent-row-<?= (int)$p['id'] ?>">
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <?php if ($p['image']): ?><img src="<?= e(upload_url($p['image'])) ?>" class="thumb" alt=""><?php else: ?><div class="thumb thumb-empty"><i class="bi bi-image"></i></div><?php endif; ?>
+                                    <?php $rimg = product_image_url($p); if ($rimg): ?><img src="<?= e($rimg) ?>" class="thumb" alt=""><?php else: ?><div class="thumb thumb-empty"><i class="bi bi-image"></i></div><?php endif; ?>
                                     <div><strong><?= e($p['name']) ?></strong><?php if ($p['sku']): ?><br><span class="badge-mono"><?= e($p['sku']) ?></span><?php endif; ?></div>
                                 </div>
                             </td>
